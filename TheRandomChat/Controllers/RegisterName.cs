@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Net;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TheRandomChat.Services;
 
 namespace TheRandomChat.Controllers
 {
@@ -9,15 +11,17 @@ namespace TheRandomChat.Controllers
     {
 
         [HttpPost("RegisterName")]
-        public ActionResult<string> RegisterName(string username)
+        public IActionResult registerName(string username)
         {
             //variables
-
+            AuthorizationJwt authorization = new AuthorizationJwt();
+            AccountControlService accountControl = new AccountControlService();
             //variables
 
-
-
-
+            if (accountControl.CheckUserExists(username))
+                return Conflict("this username is already taken");
+            else
+                return Ok(new { Url = "sd", Token = authorization.CreateJwt(username)});
         }
     }
 }
