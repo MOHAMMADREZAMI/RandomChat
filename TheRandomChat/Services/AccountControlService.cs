@@ -152,6 +152,11 @@ namespace TheRandomChat.Services
 
         }
 
+
+        /// <summary>
+        /// Get Count of Users
+        /// </summary>
+        /// <returns>Int</returns>
         public int GetCount()
         {
             return Accounts.Count;
