@@ -5,8 +5,10 @@ namespace TheRandomChat.Services
 {
     public class AccountControlService
     {
-
+        //variables
         private static ConcurrentDictionary<string,Account> Accounts = new ConcurrentDictionary<string,Account>();
+        //variables
+
 
         /// <summary>
         /// Check users that already taken or not 
@@ -69,6 +71,30 @@ namespace TheRandomChat.Services
             }
 
             return null;
+        }
+
+
+        public Connections GetTheConnections(string username)
+        {
+            //variables
+            Connections connections;
+            //variables
+
+            Accounts.TryGetValue(username, out var account);
+
+            if (account.TargetConnectionId == null)
+            {
+               return connections = new Connections()
+                      {
+                         ConnectionOne = account.ConnectionId,
+                         ConnectionTwo = account.TargetConnectionId
+                      };
+            }
+            else
+                return null;
+
+            
+
         }
 
     }

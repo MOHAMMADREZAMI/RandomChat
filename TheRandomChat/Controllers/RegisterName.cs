@@ -10,6 +10,13 @@ namespace TheRandomChat.Controllers
     public class RegisterName : ControllerBase
     {
 
+
+
+        /// <summary>
+        /// a API for Check Users is taken or not and create JwtToken
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
         [HttpPost("RegisterName")]
         public IActionResult registerName(string username)
         {
