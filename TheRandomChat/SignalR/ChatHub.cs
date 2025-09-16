@@ -5,6 +5,7 @@ using TheRandomChat.Services;
 
 namespace TheRandomChat.SignalR
 {
+    [Authorize]
     public class ChatHub : Hub
     {
 
@@ -22,7 +23,7 @@ namespace TheRandomChat.SignalR
             //variables
 
             if (Context.User.Identity.Name == null)
-                return null;
+                return Task.CompletedTask;
 
             TargetConnectionId = accountControl.IsSomeoneWaiting(Context.ConnectionId);
 
@@ -44,7 +45,7 @@ namespace TheRandomChat.SignalR
         /// </summary>
         /// <param name="Message"></param>
         [Authorize]
-        public void SendMessage(string Message)
+        public async void SendMessage(string Message)
         {
             //variables
             ChatService chatService = new ChatService();
@@ -56,20 +57,61 @@ namespace TheRandomChat.SignalR
             connections = accountControl.GetTheConnections(Context.User.Identity.Name);
 
             if (connections == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveMessage", "Please wait to connect to someone");
                 return;
+            }
 
             chat = chatService.GetTheChat(connections);
 
             if (chat == null)
+            {
+                await Clients.Caller.SendAsync("ReceiveMessage", "Please wait to connect to someone");
                 return;
+            }
 
-            chatService.SendMessage(Message, chat);
+            chatService.SendMessage(Context.User.Identity.Name + " : " + Message, chat);
 
-            Clients.Clients(connections.ConnectionTwo).SendAsync("ReceiveMessage",chat);
-            Clients.Caller.SendAsync("ReceiveMessage",chat);
+            await Clients.Clients(connections.ConnectionTwo).SendAsync("ReceiveMessage",chat.chat);
+            await Clients.Caller.SendAsync("ReceiveMessage", chat.chat);
 
         }
 
+        /// <summary>
+        /// This Method executes When someone Wants to Disconnect to Hub
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <returns></returns>
+        /// 
+        [Authorize]
+        public override Task OnDisconnectedAsync(Exception? exception)
+        {
+
+            //variables
+            AccountControlService accountControl = new AccountControlService();
+            Connections connections;
+            ChatService chatService = new ChatService();
+            string username;
+            int count;
+            //variables
+
+            count = accountControl.GetCount();
+
+            connections = accountControl.GetTheConnections(Context.User.Identity.Name);
+            if (connections != null && count != 1)
+            {
+                username = accountControl.GetTheUsername(connections.ConnectionTwo);
+                accountControl.ChangeStatus(username, "Waiting");
+                chatService.DeleteChat(connections);
+
+            }
+
+            accountControl.DeleteAccount(Context.User.Identity.Name);
+
+            
+           
+            return base.OnDisconnectedAsync(exception);
+        }
 
 
     }

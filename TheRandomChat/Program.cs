@@ -13,7 +13,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(Option =>
 {
-    TokenValidationParameters validationParameters = new TokenValidationParameters{
+    Option.TokenValidationParameters = new TokenValidationParameters
+    {
 
         ValidateIssuer = true,
         ValidateAudience = true,
@@ -23,11 +24,30 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidAudience = "RandomChat's User",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT")))
     };
+
+    Option.Events = new JwtBearerEvents
+    {
+
+        OnMessageReceived = context =>
+        {
+            var AccessToken = context.Request.Query["access_token"];
+
+            if (context.Request.Path.StartsWithSegments("/ChatHub") && AccessToken.Any())
+                context.Token = AccessToken;
+
+            return Task.CompletedTask;
+        }
+    };
+
+
+
 });
 
 builder.Services.AddSignalR();
 
 var app = builder.Build();
+
+app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -36,11 +56,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapHub<ChatHub>("/ChatHub");
 
-app.UseAuthorization();
-
 app.MapControllers();
+
+app.MapFallbackToFile("index.html");
 
 app.Run();
