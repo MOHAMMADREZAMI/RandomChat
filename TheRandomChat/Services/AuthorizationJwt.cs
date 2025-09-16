@@ -25,7 +25,7 @@ namespace TheRandomChat.Services
                 new Claim(ClaimTypes.Name, username),
             };
 
-            JwtSecurityToken jwt = new JwtSecurityToken("RandomChat", audience: "RandomChat", signingCredentials: credentials, expires: DateTime.UtcNow.AddMinutes(1));
+            JwtSecurityToken jwt = new JwtSecurityToken("RandomChat", audience: "RandomChat's User",claims:claims, signingCredentials: credentials, expires: DateTime.UtcNow.AddMinutes(1));
 
             return new JwtSecurityTokenHandler().WriteToken(jwt);
 
