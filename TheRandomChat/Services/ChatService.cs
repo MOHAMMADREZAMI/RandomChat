@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Runtime;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using TheRandomChat.Moudel;
 
 namespace TheRandomChat.Services
@@ -32,8 +33,17 @@ namespace TheRandomChat.Services
 
             for(int i = 0; i <= 1; i++)
             {
+                //variables
+                string Key;
+                //variables
 
-                Chats.TryGetValue(connections.ConnectionOne + ":" + connections.ConnectionTwo, out var chat);
+                if (i == 0)
+                    Key = connections.ConnectionOne + ":" + connections.ConnectionTwo;
+                else
+                    Key = connections.ConnectionTwo + ":" + connections.ConnectionOne;
+
+
+                    Chats.TryGetValue(Key, out var chat);
 
                 if (chat != null)
                     return chat;
@@ -54,5 +64,24 @@ namespace TheRandomChat.Services
         }
 
 
+
+        public void DeleteChat(Connections connections)
+        {
+            for (int i = 0; i <= 1; i++)
+            {
+                //variables
+                string Key;
+                //variables
+
+                if (i == 0)
+                    Key = connections.ConnectionOne + ":" + connections.ConnectionTwo;
+                else
+                    Key = connections.ConnectionTwo + ":" + connections.ConnectionOne;
+
+
+                Chats.TryRemove(Key, out var chat);
+
+            }
+        }
     }
 }
