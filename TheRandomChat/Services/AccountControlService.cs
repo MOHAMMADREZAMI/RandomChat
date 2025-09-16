@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Security.Principal;
 using TheRandomChat.Moudel;
 
 namespace TheRandomChat.Services
@@ -40,7 +41,9 @@ namespace TheRandomChat.Services
             {
                 username = username,
                 ConnectionId = ConnectionId,
-                status = status
+                status = status,
+                TargetConnectionId = TargetConnectionId
+                
             };
 
             Accounts.TryAdd(username,account);
@@ -73,7 +76,11 @@ namespace TheRandomChat.Services
             return null;
         }
 
-
+        /// <summary>
+        /// Get The Two Connections (ConnectionId,TargetConnectionId)
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns>return a 'Connections' it has got two Connections</returns>
         public Connections GetTheConnections(string username)
         {
             //variables
@@ -82,20 +89,72 @@ namespace TheRandomChat.Services
 
             Accounts.TryGetValue(username, out var account);
 
-            if (account.TargetConnectionId == null)
-            {
-               return connections = new Connections()
-                      {
-                         ConnectionOne = account.ConnectionId,
-                         ConnectionTwo = account.TargetConnectionId
-                      };
-            }
-            else
-                return null;
+                if (account.TargetConnectionId != null)
+                {
+                    return connections = new Connections()
+                    {
+                        ConnectionOne = account.ConnectionId,
+                        ConnectionTwo = account.TargetConnectionId
+                    };
+                }
+                else
+                    return null;
+        }
 
-            
+        /// <summary>
+        /// Remove a Account
+        /// </summary>
+        /// <param name="username"></param>
+        public void DeleteAccount(string username)
+        {
+            Accounts.TryRemove(username, out var account);
+        }
+
+        /// <summary>
+        /// get the username of TargetConnectionId
+        /// </summary>
+        /// <param name="TargetConnectionId"></param>
+        /// <returns>return a username (string)</returns>
+        public string GetTheUsername(string TargetConnectionId)
+        {
+
+            //variables
+            Account account;
+            //variables
+
+            for (int Check = 0; Check < Accounts.Count; Check++)
+            {
+                account = Accounts.ElementAt(Check).Value;
+
+                if (account.ConnectionId == TargetConnectionId)
+                    return account.username;
+
+            }
+
+            return null;
 
         }
 
+        /// <summary>
+        /// Change status of user
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="status"></param>
+        public void ChangeStatus(string username, string status)
+        {
+
+            if (Accounts.TryGetValue(username, out var account))
+            {
+                account.status = status;
+            }
+            else
+                return;
+
+        }
+
+        public int GetCount()
+        {
+            return Accounts.Count;
+        }
     }
 }
