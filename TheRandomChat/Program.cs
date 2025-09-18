@@ -11,6 +11,8 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.WebHost.UseUrls("http://localhost:5041", "http://localhost:5042");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(Option =>
 {
     Option.TokenValidationParameters = new TokenValidationParameters
