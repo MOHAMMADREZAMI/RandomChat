@@ -65,8 +65,6 @@ app.MapHub<ChatHub>("/ChatHub");
 
 app.MapControllers();
 
-app.MapFallbackToFile("index.html");
-
 Console.WriteLine("SignalR Hub: http://localhost:5041");
 
 app.Run();
