@@ -1,7 +1,7 @@
 # 🚨 TheRandomChat
 
 It is a RandomChat , with **ASP.NET Core** and **SignalR**. 
-It allows users to connect randomly and chat in real-time. This project is backend-only and has not graphical interface
+It allows users to connect randomly and chat in real-time. This project is backend-only and has not graphical interface (This project exposes an API)
 
 ---
 
