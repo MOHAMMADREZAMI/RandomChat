@@ -13,6 +13,16 @@ builder.Services.AddOpenApi();
 
 builder.WebHost.UseUrls("http://localhost:5041", "http://localhost:5042");
 
+string EnvironmentVariable = Environment.GetEnvironmentVariable("JWT");
+
+if (EnvironmentVariable == null)
+{
+    Console.WriteLine("Please Create a EnvironmentVariable(JWT)");
+    return;
+}
+    
+
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(Option =>
 {
     Option.TokenValidationParameters = new TokenValidationParameters
@@ -24,7 +34,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateIssuerSigningKey = true,
         ValidIssuer = "RandomChat",
         ValidAudience = "RandomChat's User",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT")))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(EnvironmentVariable))
     };
 
     Option.Events = new JwtBearerEvents
