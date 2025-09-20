@@ -19,7 +19,7 @@ Follow these steps to run the project locally:
 
 ### 1. Clone the repository
 ```bash
-gh repo clone MOHAMMADREZAMI/TheRandomChat
+gh repo clone MOHAMMADREZAMI/RandomChat
 cd TheRandomChat
 ```
 ### 2. Install prerequisites 
