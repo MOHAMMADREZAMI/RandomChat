@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RandomChat | Talk to a stranger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1d2a6b; --ink-2:#2f40a3; --sun:#ffd23f; --ok:#2fbf71; --danger:#c8302e;
+  --paper:#eceaf8; --card:#ffffff; --line:#d9d6ee; --text:#161a33; --muted:#686c93;
+  --bubble-other:#ffffff;
+  --font:"Manrope","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--paper:#12142b;--card:#1c1f3f;--line:#2c3062;--text:#eef0ff;--muted:#9ea3d3;--bubble-other:#242853;--ink:#3a4bc0;--ink-2:#4a5cd6}
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:var(--font);background:var(--paper);color:var(--text);line-height:1.7;
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+[hidden]{display:none!important}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+/* two overlapping discs: you and the stranger */
+.pair{display:inline-flex;direction:ltr}
+.disc{display:grid;place-items:center;border-radius:50%;font-weight:800;border:3px solid var(--paper)}
+.disc.me{background:var(--ink);color:#fff}
+.disc.them{background:var(--sun);color:#3a2c00;margin-left:-.35em}
+.pair.lg .disc{width:84px;height:84px;font-size:24px}
+.pair.sm .disc{width:40px;height:40px;font-size:12px;border-width:2px}
+.pair.waiting .them{animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.12)}}
+@media (prefers-reduced-motion:reduce){.pair.waiting .them{animation:none}}
+
+/* login */
+#login{min-height:100%;display:grid;place-items:center;padding:24px}
+.login-box{width:100%;max-width:400px}
+.login-box h1{font-size:2.2rem;font-weight:800;line-height:1.2;margin:22px 0 8px;color:var(--ink)}
+@media (prefers-color-scheme:dark){.login-box h1{color:var(--text)}}
+.login-box p{margin:0 0 24px;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-weight:500;font-size:.92rem}
+.field input{padding:13px 14px;border:2px solid var(--line);border-radius:14px;background:var(--card);width:100%}
+.field input:focus{border-color:var(--ink-2);outline:none}
+.btn{display:block;width:100%;padding:14px;border:0;border-radius:14px;background:var(--ink);color:#fff;font-weight:700;font-size:1.05rem}
+.btn:hover:not(:disabled){background:var(--ink-2)}
+.btn:disabled{opacity:.55;cursor:default}
+.err{color:var(--danger);font-weight:500;margin:0 0 12px;min-height:1.6em}
+details.adv{margin-top:22px;color:var(--muted);font-size:.9rem}
+details.adv summary{cursor:pointer;width:max-content}
+details.adv .field{margin:10px 0 0}
+.hint{font-size:.85rem;color:var(--muted)}
+
+/* chat */
+#chat{height:100%;display:flex;flex-direction:column;max-width:760px;margin:0 auto;background:var(--paper)}
+.top{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--line)}
+.who{flex:1;min-width:0}
+.who b{display:block;font-weight:700;line-height:1.3}
+.state{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.on{background:var(--ok)}.dot.wait{background:var(--sun)}
+.tbtn{border:1px solid var(--line);background:transparent;border-radius:10px;padding:7px 12px;font-size:.88rem;font-weight:500}
+.tbtn:hover{background:var(--paper)}
+.tbtn.main{background:var(--ink);border-color:var(--ink);color:#fff}
+.tbtn.main:hover{background:var(--ink-2)}
+#msgs{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:6px;overscroll-behavior:contain}
+.empty{margin:auto;text-align:center;color:var(--muted);max-width:290px}
+.empty b{display:block;color:var(--text);font-size:1.1rem;margin-bottom:4px}
+.note{align-self:center;font-size:.8rem;color:var(--muted);background:var(--card);border:1px solid var(--line);padding:2px 12px;border-radius:99px;margin:6px 0}
+.note.bad{color:var(--danger);border-color:var(--danger)}
+.row{display:flex}
+.row.own{justify-content:flex-end}
+.bubble{max-width:78%;padding:8px 13px;border-radius:18px;background:var(--bubble-other);border:1px solid var(--line);
+  border-top-left-radius:6px;overflow-wrap:anywhere;white-space:pre-wrap}
+.own .bubble{background:var(--ink);border-color:var(--ink);color:#fff;border-top-left-radius:18px;border-top-right-radius:6px}
+form.compose{display:flex;gap:8px;padding:10px 12px;background:var(--card);border-top:1px solid var(--line)}
+form.compose input{flex:1;min-width:0;padding:12px 16px;border:2px solid var(--line);border-radius:99px;background:var(--paper)}
+form.compose input:focus{border-color:var(--ink-2);outline:none}
+form.compose button{width:46px;height:46px;border:0;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center}
+form.compose button:disabled{opacity:.45;cursor:default}
+form.compose svg{width:20px;height:20px}
+@media (max-width:480px){.login-box h1{font-size:1.7rem}.tbtn{padding:6px 9px}}
+</style>
+</head>
+<body>
+
+<main id="login">
+  <form class="login-box" id="loginForm" autocomplete="off">
+    <div class="pair lg"><span class="disc me">You</span><span class="disc them">?</span></div>
+    <h1>Talk to a stranger</h1>
+    <p>Pick a name and jump in. No sign-up, no history.</p>
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" maxlength="24" required placeholder="e.g. Traveler">
+    </div>
+    <p class="err" id="err" role="alert"></p>
+    <button class="btn" id="startBtn" type="submit">Start chatting</button>
+    <details class="adv">
+      <summary>Server settings</summary>
+      <div class="field">
+        <label for="server">Server address</label>
+        <input id="server" dir="ltr" placeholder="http://localhost:5041">
+        <span class="hint">If this page is served by the server itself, the default is correct.</span>
+      </div>
+    </details>
+  </form>
+</main>
+
+<section id="chat" hidden>
+  <header class="top">
+    <div class="pair sm waiting" id="pair"><span class="disc me">You</span><span class="disc them">?</span></div>
+    <div class="who">
+      <b>Anonymous partner</b>
+      <span class="state"><i class="dot" id="dot"></i><span id="status">Offline</span></span>
+    </div>
+    <button class="tbtn main" id="newBtn" type="button">New chat</button>
+    <button class="tbtn" id="exitBtn" type="button">Leave</button>
+  </header>
+  <div id="msgs" aria-live="polite">
+    <div class="empty" id="empty"><b>No messages yet</b>Say hi to start. If no partner has joined yet, you’ll get a waiting notice. Try again in a moment.</div>
+  </div>
+  <form class="compose" id="compose" autocomplete="off">
+    <input id="text" placeholder="Type a message…" enterkeyhint="send" dir="auto" disabled aria-label="Message">
+    <button id="sendBtn" type="submit" disabled aria-label="Send">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.5 20.5 22 12 2.5 3.5l0 6.6L16 12 2.5 13.9z"/></svg>
+    </button>
+  </form>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const defaultServer = location.protocol.startsWith('http') ? location.origin : 'http://localhost:5041';
+
+let hub = null, currentToken = '', appliedToken = null, hubUrl = '', name = '', rendered = 0;
+
+$('server').value = localStorage.getItem('rc2_server') || defaultServer;
+$('username').value = localStorage.getItem('rc2_user') || '';
+
+const serverBase = () => ($('server').value.trim() || defaultServer).replace(/\/+$/, '');
+
+/* ---------- register / get token ---------- */
+async function register(user) {
+  for (let i = 0; i < 4; i++) {
+    const res = await fetch(`${serverBase()}/api/RegisterName/RegisterName?username=${encodeURIComponent(user)}`, { method: 'POST' });
+    if (res.status === 409) {
+      if (i < 3) { await new Promise(r => setTimeout(r, 450)); continue; }
+      throw { code: 409 };
+    }
+    if (!res.ok) throw { code: res.status };
+    let data = await res.json().catch(() => null);
+    const t = data?.token ?? data?.Token;
+    if (!t) throw { code: 'notoken' };
+    return t;
+  }
+}
+
+/* ---------- SignalR connection ---------- */
+function buildHub() {
+  const h = new signalR.HubConnectionBuilder()
+    .withUrl(hubUrl, { accessTokenFactory: () => currentToken })
+    .withAutomaticReconnect()
+    .build();
+  h.onclose(() => { setState('off', 'Offline'); toggleComposer(false); note('Connection lost. Press “New chat” to continue.', true); });
+  h.onreconnecting(() => setState('wait', 'Connecting…'));
+  h.onreconnected(() => { setState('on', 'Connected'); appliedToken = currentToken; });
+  h.on('ReceiveMessage', data => {
+    if (typeof data === 'string') note(data);   // server notice, e.g. "Please wait to connect to someone"
+    else render(data || []);
+  });
+  return h;
+}
+
+async function connect() {
+  if (hub) { try { await hub.stop(); } catch {} }
+  hubUrl = serverBase() + '/ChatHub';
+  hub = buildHub();
+  setState('wait', 'Connecting…');
+  await hub.start();
+  appliedToken = currentToken;
+  setState('on', 'Connected');
+  toggleComposer(true);
+  $('text').focus();
+}
+
+/* ---------- start, new chat, leave ---------- */
+$('loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  name = $('username').value.trim();
+  if (!name) return;
+  $('err').textContent = '';
+  $('startBtn').disabled = true; $('startBtn').textContent = 'Joining…';
+  try {
+    currentToken = await register(name);
+    localStorage.setItem('rc2_user', name);
+    localStorage.setItem('rc2_server', serverBase());
+    resetChat();
+    $('login').hidden = true; $('chat').hidden = false;
+    await connect();
+  } catch (err) {
+    $('login').hidden = false; $('chat').hidden = true;
+    $('err').textContent = err.code === 409
+      ? 'That name is in use right now. Pick another one.'
+      : 'Couldn’t reach the server. Check the address under “Server settings”.';
+  } finally {
+    $('startBtn').disabled = false; $('startBtn').textContent = 'Start chatting';
+  }
+});
+
+$('newBtn').addEventListener('click', async () => {
+  $('newBtn').disabled = true;
+  toggleComposer(false);
+  setState('wait', 'Connecting…');
+  try {
+    if (hub) { hub.onclose(() => {}); try { await hub.stop(); } catch {} }
+    currentToken = await register(name);
+    resetChat();
+    await connect();
+  } catch {
+    setState('off', 'Offline');
+    note('Couldn’t start a new chat. Try again or leave.', true);
+  } finally { $('newBtn').disabled = false; }
+});
+
+$('exitBtn').addEventListener('click', async () => {
+  if (hub) { hub.onclose(() => {}); try { await hub.stop(); } catch {} hub = null; }
+  currentToken = ''; resetChat();
+  $('chat').hidden = true; $('login').hidden = false;
+  $('username').focus();
+});
+
+/* ---------- send message ---------- */
+$('compose').addEventListener('submit', async e => {
+  e.preventDefault();
+  const text = $('text').value.trim();
+  if (!text || !hub) return;
+  try {
+    await hub.invoke('SendMessage', text);
+    $('text').value = '';
+  } catch { note('Message not sent.', true); }
+});
+
+/* ---------- rendering ---------- */
+function render(items) {
+  const box = $('msgs');
+  if (items.length < rendered) { clearBubbles(); rendered = 0; }
+  const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+  let ownAdded = false;
+  for (let i = rendered; i < items.length; i++) {
+    const m = items[i], idx = m.indexOf(' : ');
+    const author = idx === -1 ? '' : m.slice(0, idx);
+    const content = idx === -1 ? m : m.slice(idx + 3);
+    const own = author === name;
+    const row = document.createElement('div');
+    row.className = 'row bubble-row' + (own ? ' own' : '');
+    const b = document.createElement('div');
+    b.className = 'bubble'; b.dir = 'auto'; b.textContent = content;
+    row.appendChild(b); box.appendChild(row);
+    if (own) ownAdded = true;
+  }
+  rendered = items.length;
+  if (rendered) { $('empty').hidden = true; $('pair').classList.remove('waiting'); }
+  if (nearBottom || ownAdded) box.scrollTop = box.scrollHeight;
+}
+function note(text, bad) {
+  const n = document.createElement('div');
+  n.className = 'note' + (bad ? ' bad' : ''); n.textContent = text;
+  $('msgs').appendChild(n); $('msgs').scrollTop = $('msgs').scrollHeight;
+}
+function clearBubbles() { document.querySelectorAll('.bubble-row').forEach(n => n.remove()); }
+function resetChat() {
+  clearBubbles(); document.querySelectorAll('.note').forEach(n => n.remove());
+  rendered = 0; $('empty').hidden = false; $('pair').classList.add('waiting'); $('text').value = '';
+}
+function setState(kind, label) { $('dot').className = 'dot ' + kind; $('status').textContent = label; }
+function toggleComposer(on) { $('text').disabled = !on; $('sendBtn').disabled = !on; }
+</script>
+</body>
+</html>
