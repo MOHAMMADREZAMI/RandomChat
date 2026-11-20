@@ -65,13 +65,15 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<ChatHub>("/ChatHub");
 
 app.MapControllers();
+
+app.UseStaticFiles();
+app.UseFileServer();
 
 Console.WriteLine("SignalR Hub: http://localhost:5041/ChatHub");
 
