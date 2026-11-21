@@ -1,11 +1,11 @@
-# 🚨 TheRandomChat
+# TheRandomChat
 
 It is a RandomChat , with **ASP.NET Core** and **SignalR**. 
 It allows users to connect randomly and chat in real-time. 
 
 ---
 
-## ✨ Features
+## Features
 - Anonymous connection: no account required
 - Random matching: users are connected randomly for 1-to-1 chats 
 - Real-time text chat via SignalR  
@@ -13,7 +13,7 @@ It allows users to connect randomly and chat in real-time.
 
 ---
 
-## 📥 Installation
+## Installation
 
 Follow these steps to run the project locally:
 
@@ -37,5 +37,5 @@ dotnet add package Microsoft.AspNetCore.SignalR.Client
 dotnet run
 ```
 
-## 📄 License
+## License
 This project is open-source and licensed under the [MIT License](LICENSE).
